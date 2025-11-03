@@ -13,24 +13,24 @@ const app = express();
 app.use(cors({ origin: "*", methods: ["GET", "POST"] }));
 app.use(bodyParser.json());
 
-// JSON dosyalarını yükle
+// ✅ Dosya yollarını Render için düzelt
 const CONFIG = JSON.parse(fs.readFileSync("./backend/config.json", "utf8"));
 const SSS_TR = JSON.parse(fs.readFileSync("./backend/sss.tr.json", "utf8"));
 
-// OpenAI istemcisi
+// ✅ OpenAI istemcisi
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-// Basit log middleware
+// 🛰️ Basit log
 app.use((req, res, next) => {
   console.log("🛰️ İstek geldi:", req.method, req.url);
   next();
 });
 
-// Statik endpoint'ler
+// ✅ API endpointleri
 app.get("/api/config", (req, res) => res.json(CONFIG));
 app.get("/api/sss", (req, res) => res.json(SSS_TR));
 
-// --- Embedding önbelleği
+// --- Embedding Cache
 let embeddingsCache = [];
 
 async function generateEmbeddings() {
@@ -84,9 +84,7 @@ app.post("/api/ask", async (req, res) => {
     const { text } = req.body;
     console.log("📩 Gelen soru:", text);
 
-    if (!text) {
-      return res.status(400).json({ error: "Soru metni boş olamaz." });
-    }
+    if (!text) return res.status(400).json({ error: "Soru metni boş olamaz." });
 
     const faq = await findFAQ(text);
     if (faq) {
@@ -95,12 +93,6 @@ app.post("/api/ask", async (req, res) => {
     }
 
     console.log("🟡 OpenAI fallback başlatılıyor...");
-
-    const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-    if (!OPENAI_API_KEY) {
-      console.error("🚫 OPENAI_API_KEY tanımlı değil");
-      return res.status(500).json({ error: "OPENAI_API_KEY eksik" });
-    }
 
     const factsText = Object.entries(CONFIG.facts)
       .map(([k, v]) => `${k.replace(/_/g, " ")}: ${Array.isArray(v) ? v.join(", ") : v}`)
@@ -111,19 +103,15 @@ Sen Beta Enerji'nin dijital insan kaynakları asistanısın.
 Kullanıcılara işe alım, staj, başvuru süreci, mülakat, özgeçmiş ve şirket hakkında rehberlik yaparsın.
 Amacın, onlara profesyonel bir dille yardımcı olmak, motive etmek ve yönlendirme sağlamaktır.
 
-Aşağıda Beta Enerji'ye ait doğrulanmış bilgiler bulunmaktadır. Bunları resmi kaynak olarak kullan.
+Aşağıda Beta Enerji’ye ait doğrulanmış bilgiler bulunmaktadır:
 ${factsText}
 
 Kuralların:
-1. Eğer soru doğrudan şirket bilgileriyle ilgiliyse (örneğin adres, çalışan sayısı, sektör), bu verileri kullan.
-2. Eğer soru kariyer, başvuru veya mülakatla ilgiliyse, genel İK tecrübene dayanarak rehberlik et.
-3. Kullanıcıyı motive eden, empatik ve saygılı bir dil kullan.
-4. Bilgi kesin değilse "Genellikle" veya "Beta Enerji'de bu süreç şöyle işler..." diye açıkla.
-5. Asla yeni sayılar uydurma veya yanlış bilgi verme.
-6. Gerektiğinde kullanıcıyı resmi kanala yönlendir: ${CONFIG.links.contact}.
-
-Cevaplarını Türkçe, samimi ama profesyonel bir üslupla yaz.
-Her cevap 2–4 cümle arasında olsun.
+1. Şirketle ilgili kesin verilerde bu bilgileri kullan.
+2. Kariyer, mülakat, özgeçmiş gibi konularda rehberlik et.
+3. Empatik, samimi ama profesyonel konuş.
+4. Bilgi yoksa yönlendir: ${CONFIG.links.contact}.
+5. Cevap 2–4 cümle arası, doğal Türkçe olmalı.
 `;
 
     const body = {
@@ -132,33 +120,22 @@ Her cevap 2–4 cümle arasında olsun.
         { role: "system", content: systemPrompt },
         { role: "user", content: text },
       ],
-      temperature: 0.2,
-      max_tokens: 200,
+      temperature: 0.3,
+      max_tokens: 250,
     };
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${OPENAI_API_KEY}`,
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
       },
       body: JSON.stringify(body),
     });
 
-    console.log("🌐 OpenAI status:", response.status);
+    const data = await response.json();
+    const answer = data?.choices?.[0]?.message?.content?.trim() || "Yanıt alınamadı.";
 
-    const data = await response.json().catch((e) => {
-      console.error("❌ JSON parse hatası:", e);
-      return {};
-    });
-
-    const answer = data?.choices?.[0]?.message?.content?.trim();
-    if (!answer) {
-      console.warn("⚠️ Boş yanıt alındı!");
-      return res.json({ answer: "Yanıt alınamadı.", source: "openai" });
-    }
-
-    console.log("✅ OpenAI yanıtı hazır.");
     res.json({ answer, source: "openai" });
   } catch (e) {
     console.error("🔥 Sunucu hatası:", e);
@@ -166,8 +143,8 @@ Her cevap 2–4 cümle arasında olsun.
   }
 });
 
-// --- Sunucu başlat (Render uyumlu)
+// --- 🔥 Render’a özel: 0.0.0.0 binding
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-  console.log(`✅ Backend çalışıyor: ${PORT} portunda`);
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`✅ Backend çalışıyor: http://0.0.0.0:${PORT}`);
 });
