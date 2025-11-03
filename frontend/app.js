@@ -34,18 +34,15 @@ function preGuard(userText) {
 }
 
 function sanitizeLinks(text) {
-  if (!text || typeof text !== "string") return ""; // 💥 Hata önleyici eklendi
-
+  if (!text || typeof text !== "string") return "";
   const WL = CONFIG.whitelist || [];
   const isOk = (url) => WL.some((rx) => new RegExp(rx, "i").test(url));
 
-  // 1) Markdown link
   text = text.replace(
     /\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g,
     (m, label, url) => (isOk(url) ? m : `${label} [link kaldırıldı]`)
   );
 
-  // 2) Düz URL
   text = text.replace(
     /(https?:\/\/\S+?)([),.;!?]*)(\s|$)/g,
     (m, url, trail, end) =>
@@ -55,7 +52,6 @@ function sanitizeLinks(text) {
   return text;
 }
 
-
 function applyCanonicalFacts(text) {
   const size = CONFIG?.facts?.facility_size_m2;
   if (size && /m²/i.test(text) && /tesis|fabrika|alan/i.test(text)) {
@@ -64,9 +60,9 @@ function applyCanonicalFacts(text) {
   return text;
 }
 
-// ✅ Artık sadece backend'e istek atan temiz fonksiyon
+// ✅ Render backend'e istek atan versiyon
 async function askBackend(userText) {
-  const res = await fetch("http://127.0.0.1:3001/api/ask", {
+  const res = await fetch("https://beta-ik-chat.onrender.com/api/ask", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ text: userText }),
@@ -76,7 +72,6 @@ async function askBackend(userText) {
   if (!data.answer) throw new Error("Boş yanıt döndü");
   return data.answer;
 }
-
 
 function App() {
   const [ready, setReady] = useState(false);
@@ -95,7 +90,6 @@ function App() {
     const text = input.trim();
     if (!text) return;
 
-    // pre-guard
     const blocked = preGuard(text);
     if (blocked) {
       setMessages((m) => [
@@ -107,9 +101,7 @@ function App() {
       return;
     }
 
-    // kullanıcı mesajını ekle
-    const historyLocal = [...messages, { role: "user", content: text }];
-    setMessages(historyLocal);
+    setMessages((m) => [...m, { role: "user", content: text }]);
     setInput("");
     setBusy(true);
 
@@ -137,8 +129,7 @@ function App() {
     }
   }
 
-  if (!ready)
-    return React.createElement("div", { className: "app" }, "Yükleniyor...");
+  if (!ready) return <div className="app">Yükleniyor...</div>;
 
   return (
     <div className="app">

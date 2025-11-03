@@ -14,8 +14,8 @@ app.use(cors({ origin: "*", methods: ["GET", "POST"] }));
 app.use(bodyParser.json());
 
 // JSON dosyalarını yükle
-const CONFIG = JSON.parse(fs.readFileSync("./config.json", "utf8"));
-const SSS_TR = JSON.parse(fs.readFileSync("./sss.tr.json", "utf8"));
+const CONFIG = JSON.parse(fs.readFileSync("./backend/config.json", "utf8"));
+const SSS_TR = JSON.parse(fs.readFileSync("./backend/sss.tr.json", "utf8"));
 
 // OpenAI istemcisi
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -102,12 +102,11 @@ app.post("/api/ask", async (req, res) => {
       return res.status(500).json({ error: "OPENAI_API_KEY eksik" });
     }
 
+    const factsText = Object.entries(CONFIG.facts)
+      .map(([k, v]) => `${k.replace(/_/g, " ")}: ${Array.isArray(v) ? v.join(", ") : v}`)
+      .join("; ");
 
- const factsText = Object.entries(CONFIG.facts)
-  .map(([k, v]) => `${k.replace(/_/g, " ")}: ${Array.isArray(v) ? v.join(", ") : v}`)
-  .join("; ");
-
-const systemPrompt = `
+    const systemPrompt = `
 Sen Beta Enerji'nin dijital insan kaynakları asistanısın.
 Kullanıcılara işe alım, staj, başvuru süreci, mülakat, özgeçmiş ve şirket hakkında rehberlik yaparsın.
 Amacın, onlara profesyonel bir dille yardımcı olmak, motive etmek ve yönlendirme sağlamaktır.
@@ -126,8 +125,6 @@ Kuralların:
 Cevaplarını Türkçe, samimi ama profesyonel bir üslupla yaz.
 Her cevap 2–4 cümle arasında olsun.
 `;
-
-
 
     const body = {
       model: "gpt-4o-mini",
@@ -155,8 +152,6 @@ Her cevap 2–4 cümle arasında olsun.
       return {};
     });
 
-    console.log("🔵 OpenAI yanıtı:", JSON.stringify(data, null, 2));
-
     const answer = data?.choices?.[0]?.message?.content?.trim();
     if (!answer) {
       console.warn("⚠️ Boş yanıt alındı!");
@@ -171,8 +166,8 @@ Her cevap 2–4 cümle arasında olsun.
   }
 });
 
-// --- Sunucu başlat
-const PORT = 3001;
-app.listen(PORT, "127.0.0.1", () => {
-  console.log(`✅ Backend çalışıyor: http://127.0.0.1:${PORT}`);
+// --- Sunucu başlat (Render uyumlu)
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => {
+  console.log(`✅ Backend çalışıyor: ${PORT} portunda`);
 });
