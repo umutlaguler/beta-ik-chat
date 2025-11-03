@@ -1,0 +1,29 @@
+{
+  "brand": "Beta Enerji • İK Chat",
+  "links": {
+    "careers_tr": "https://betaenerji.com/kariyer",
+    "intern_tr": "https://betaenerji.com/staj",
+    "contact": "https://betaenerji.com/iletisim"
+  },
+  "whitelist": [
+    "^https?:\\/\\/(www\\.)?betaenerji\\.com",
+    "^https?:\\/\\/kariyer\\.betaenerji\\.com"
+  ],
+   "facts": {
+    "facility_size_m2": "63.680 m²",                                  
+    "campus_total_area_m2": "120.000 m²",                             
+    "employee_count": "500+ kişi",                                    
+    "export_countries": "80+ ülke",                                   
+    "sector_experience_years": "47+ yıl",                            
+    "founded_year": "1997",                                           
+    "address": "Hacı Sabancı Organize Sanayi Bölgesi Çanakkale Cd. No:11 ADANA / TÜRKİYE", 
+    "quality_certifications": ["ISO 9001", "ISO 14001", "ISO 18001", "CE", "TSE"],     
+    "vision": "Türkiye’nin en başarılı enerji markası olmak",         
+    "mission": "Enerji sektörünün ihtiyaçlarını doğru analiz edip müşteri odaklı çözümler sunmaktır", 
+    "industry_specialization": "Yağlı ve kuru tip dağıtım transformatörleri, güç transformatörleri ve özel sargılı transformatörler",
+    "planned_investment_usd": "≈130 milyon USD",                       
+    "planned_global_facilities_count": "10 ülke",                      
+    "year_established_arde": "2017",                                  
+    "web_site": "https://betaenerji.com"                              
+  }
+}

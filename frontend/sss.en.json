@@ -1,0 +1,26 @@
+[
+  {
+    "q": "What are the working hours?",
+    "a": "Weekdays 08:30–18:00. Shuttle and meal are provided.",
+    "tags": [
+      "working hours",
+      "benefits"
+    ]
+  },
+  {
+    "q": "When are internship applications?",
+    "a": "Summer internships open in April–May. Apply: https://beta-enerji.com/staj",
+    "tags": [
+      "internship",
+      "apply"
+    ]
+  },
+  {
+    "q": "Where can I see open roles?",
+    "a": "See current roles: https://beta-enerji.com/kariyer",
+    "tags": [
+      "jobs",
+      "careers"
+    ]
+  }
+]

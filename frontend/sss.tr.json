@@ -1,0 +1,27 @@
+[
+  {
+    "q": "Çalışma saatleri nedir?",
+    "a": "Hafta içi 08:30–18:00. Servis ve yemek vardır.",
+    "tags": [
+      "çalışma saatleri",
+      "servis",
+      "yemek"
+    ]
+  },
+  {
+    "q": "Staj başvurusu ne zaman?",
+    "a": "Yaz stajları Nisan–Mayıs döneminde açılır. Başvuru: https://beta-enerji.com/staj",
+    "tags": [
+      "staj",
+      "başvuru"
+    ]
+  },
+  {
+    "q": "Açık pozisyonları nerede görebilirim?",
+    "a": "Güncel ilanlar: https://beta-enerji.com/kariyer",
+    "tags": [
+      "ilan",
+      "kariyer"
+    ]
+  }
+]
